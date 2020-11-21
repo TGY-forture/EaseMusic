@@ -1,0 +1,244 @@
+<template>
+  <div class="user" ref="u">
+    <a-avatar
+      class="avatar"
+      src="https://p3.music.126.net/TmBm7D8UUx87qp2lnOJtLA==/109951165478043053.jpg"
+      icon="user"
+      @click="showModal"
+    />
+    <a-dropdown
+      placement="bottomCenter"
+      :trigger="['click']"
+      :getPopupContainer="
+        () => {
+          return $refs.u;
+        }
+      "
+    >
+      <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+        流金岁月<i class="custom-icon custom-icon-arrow-down"></i>
+      </a>
+      <div class="u-drop" slot="overlay">
+        <div class="concern">
+          <div>
+            <p>0</p>
+            <p>动态</p>
+          </div>
+          <div>
+            <p>1</p>
+            <p>关注</p>
+          </div>
+          <div>
+            <p>2</p>
+            <p>粉丝</p>
+          </div>
+        </div>
+        <a-button>签到</a-button>
+        <ul class="citem">
+          <li>
+            <i class="custom-icon custom-icon-level"></i>
+            <span>等级</span>
+            <i class="uarrow custom-icon custom-icon-Right"></i>
+          </li>
+          <li>
+            <i class="custom-icon custom-icon-user_info"></i>
+            <span>个人信息</span>
+            <i class="uarrow custom-icon custom-icon-Right"></i>
+          </li>
+          <li>
+            <i class="custom-icon custom-icon-log-out"></i>
+            <span>退出登录</span>
+          </li>
+        </ul>
+      </div>
+    </a-dropdown>
+    <i class="nav-ri custom-icon custom-icon-icon_skin"></i>
+    <i class="nav-ri custom-icon custom-icon-Email"></i>
+    <i class="nav-ri custom-icon custom-icon-rescale"></i>
+    <i class="nav-ri custom-icon custom-icon-sub"></i>
+    <i class="nav-ri custom-icon custom-icon-error"></i>
+    <a-modal
+      v-model="visible"
+      :footer="null"
+      :mask="false"
+      :destroyOnClose="true"
+      :width="300"
+      class="modal-log"
+    >
+      <i slot="closeIcon" class="custom-icon custom-icon-error"></i>
+      <div class="pic-phone">
+        <i class="custom-icon custom-icon-cellphone_hover_hov"></i>
+      </div>
+      <a-form-model
+        layout="inline"
+        @submit="handleSubmit"
+        @submit.native.prevent
+      >
+        <a-form-model-item>
+          <a-input
+            addon-before="+86"
+            :allowClear="true"
+            type="text"
+            v-model="phone"
+            placeholder="请输入手机号"
+          >
+            <i slot="prefix" class="custom-icon custom-icon-contextphone"></i>
+          </a-input>
+        </a-form-model-item>
+        <a-form-model-item>
+          <a-input
+            :allowClear="true"
+            placeholder="请输入密码"
+            type="password"
+            autocomplete
+            v-model="pass"
+            @pressEnter="pressEnter"
+          >
+            <i
+              slot="prefix"
+              class="custom-icon custom-icon-suoguanli-icon-grey"
+            ></i>
+          </a-input>
+        </a-form-model-item>
+        <a-form-model-item>
+          <a-checkbox @change="onChange">自动登录</a-checkbox>
+        </a-form-model-item>
+        <a-form-model-item>
+          <a-button htmlType="submit">登录</a-button>
+        </a-form-model-item>
+      </a-form-model>
+      <div style="text-align: center">
+        <a href="javascript:void 0;">注册</a>
+      </div>
+    </a-modal>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "User",
+  data() {
+    return {
+      visible: false,
+      phone: "",
+      pass: "",
+    };
+  },
+  methods: {
+    showModal() {
+      this.visible = true;
+    },
+    handleSubmit(e) {},
+    pressEnter() {
+      console.log(1);
+    },
+    onChange(e) {
+      console.log(`checked = ${e.target.checked}`);
+    },
+  },
+};
+</script>
+
+<style lang="scss">
+.user {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  .ant-dropdown-link {
+    color: grey;
+    margin-left: 10px;
+    &:hover {
+      color: #1890ff;
+    }
+  }
+  .u-drop {
+    background-color: white;
+    border-radius: 6px;
+    width: 220px;
+    padding: 0 14px 5px;
+    .concern {
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      align-items: center;
+      div {
+        cursor: pointer;
+      }
+      p {
+        margin-bottom: 0;
+        &:nth-child(2) {
+          margin: 0 10px;
+        }
+      }
+    }
+    .citem {
+      margin-bottom: 0;
+      li {
+        display: flex;
+        align-items: center;
+        border-radius: 6px;
+        margin-bottom: 6px;
+        padding-left: 5px;
+        cursor: pointer;
+        &:hover {
+          background-color: #f0f1f2;
+        }
+        span {
+          margin-left: 10px;
+        }
+        .uarrow {
+          margin-left: auto;
+        }
+      }
+    }
+    .ant-btn {
+      border-radius: 16px;
+      margin: 15px auto;
+      display: block;
+    }
+  }
+  .avatar {
+    cursor: pointer;
+  }
+  .nav-ri {
+    margin-left: 10px;
+    cursor: pointer;
+    &:hover {
+      color: #1ecc94;
+    }
+  }
+  .custom-icon {
+    font-size: 20px;
+  }
+  .custom-icon-arrow-down {
+    vertical-align: middle;
+  }
+}
+.modal-log {
+  .pic-phone {
+    text-align: center;
+    .custom-icon-cellphone_hover_hov {
+      font-size: 80px !important;
+      color: #0984e3;
+    }
+  }
+  .ant-form {
+    .ant-row {
+      display: flex;
+      justify-content: center;
+      margin-right: 0 !important;
+      .ant-col {
+        width: 236px;
+      }
+    }
+    .ant-btn {
+      display: block;
+      margin: 0 auto;
+      width: 100%;
+      height: 38px;
+      margin-bottom: 15px;
+    }
+  }
+}
+</style>

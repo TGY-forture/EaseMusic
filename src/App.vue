@@ -1,32 +1,30 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <Left />
+    <Right />
   </div>
 </template>
-
+<script>
+import Left from "@/views/left";
+import Right from "@/views/right";
+export default {
+  name: "App",
+  components: {
+    Left,
+    Right,
+  },
+};
+</script>
 <style lang="scss">
+@import url("../src/assets/css/index.scss");
+@import url("//at.alicdn.com/t/font_2000699_f6s9ohl7k4c.css");
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+  width: 970px;
+  height: 90%;
+  border: 1px solid #000;
+  // border: 1px solid #f5f5f5;
+  border-radius: 4px;
+  margin: 20px auto 0;
+  display: flex;
 }
 </style>
