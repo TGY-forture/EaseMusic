@@ -17,9 +17,9 @@ export default {
 </script>
 <style lang="scss">
 @import url("../src/assets/css/index.scss");
-@import url("//at.alicdn.com/t/font_2000699_f6s9ohl7k4c.css");
+@import url("//at.alicdn.com/t/font_2000699_h4hfhlj66f.css");
 #app {
-  width: 970px;
+  width: 1000px;
   height: 90%;
   border: 1px solid #000;
   // border: 1px solid #f5f5f5;
