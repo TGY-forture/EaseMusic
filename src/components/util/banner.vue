@@ -6,6 +6,7 @@
       :key="index"
       :style="state[index]"
       :class="mid && index == indexloop[1] ? 'jumpchange' : ''"
+      @animationend="mid = false"
       alt="logo"
     />
     <div class="dot-all">
@@ -14,7 +15,6 @@
         v-for="i in 10"
         :key="i"
         @mouseenter="indexChange(i - 1)"
-        @mouseleave="mid = false"
         :style="{ backgroundColor: i - 1 == index ? '#EA2027' : '#bdc3c7' }"
       ></span>
     </div>
@@ -58,13 +58,28 @@ let continusState = [
     transform: "scale(1,1)",
   },
 ];
-
 export default {
   name: "Banner",
   data() {
     return {
       bannerpics,
-      state: continusState,
+      state: [
+        {
+          left: 0,
+          transform: "scale(1,1)",
+          "z-index": 0,
+        },
+        {
+          left: "25%",
+          transform: "scale(1.25,1.25)",
+          "z-index": 3,
+        },
+        {
+          left: "360px",
+          "z-index": 0,
+          transform: "scale(1,1)",
+        },
+      ],
       piecepic: bannerpics.slice(0, 3),
       bannerindex: 3, //下一个需要显示的图片索引
       show: false,
