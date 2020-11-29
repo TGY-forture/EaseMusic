@@ -9,7 +9,7 @@
       </div>
       <User />
     </nav>
-    <MusicRoom />
+    <router-view></router-view>
   </div>
 </template>
 
