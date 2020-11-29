@@ -214,7 +214,9 @@ export default {
   .single-song {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    div:not(:nth-child(4n)) {
+      margin-right: 13px;
+    }
   }
 }
 </style>
