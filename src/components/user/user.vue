@@ -47,7 +47,7 @@
           </li>
           <li>
             <i class="custom-icon custom-icon-log-out"></i>
-            <span>退出登录</span>
+            <span @click="logOut">退出登录</span>
           </li>
         </ul>
       </div>
@@ -128,12 +128,30 @@ export default {
     showModal() {
       this.visible = true;
     },
-    handleSubmit(e) {},
+    handleSubmit(e) {
+      this.$axios
+        .get(
+          "http://localhost:3000/login/cellphone?phone=18361812729&password=xxxx"
+        )
+        .then((res) => {
+          if (res.data.code == 200) {
+            this.$message.success("登录成功");
+          }
+        });
+    },
     pressEnter() {
       console.log(1);
     },
     onChange(e) {
-      console.log(`checked = ${e.target.checked}`);
+      // console.log(`checked = ${e.target.checked}`);
+    },
+    logOut() {
+      this.$axios.get("http://localhost:3000/logout").then((res) => {
+        console.log(res);
+        if (res.data.code == 200) {
+          this.$message.success("已下线");
+        }
+      });
     },
   },
 };
