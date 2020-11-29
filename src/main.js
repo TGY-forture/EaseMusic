@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-import { message, Avatar, Button, Dropdown, Menu, Icon, Modal, FormModel, Input, Checkbox } from 'ant-design-vue';
+import { message, Avatar, Button, Dropdown, Menu, Icon, Modal, FormModel, Input, Checkbox, Popover } from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
 
 import axios from 'axios'
@@ -20,6 +20,7 @@ Vue.use(Icon)
 Vue.use(Modal)
 Vue.use(Input)
 Vue.use(Checkbox)
+Vue.use(Popover)
 
 Vue.prototype.$message = message;
 Vue.prototype.$axios = axios
