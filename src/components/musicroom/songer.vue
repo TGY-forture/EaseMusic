@@ -6,9 +6,11 @@
         href="javascript:void 0;"
         v-for="(item, index) of lang"
         :key="index"
-        @click="li = index"
+        @click="update(null, type, item.area, initial)"
       >
-        <span :style="li == index ? styobj : ''">{{ item }}</span>
+        <span :style="area == item.area ? styobj : ''" :area="item.area">
+          {{ item.name }}
+        </span>
       </a>
     </div>
     <div class="f-con">
@@ -17,9 +19,11 @@
         href="javascript:void 0;"
         v-for="(item, index) of kind"
         :key="index"
-        @click="ki = index"
+        @click="update(null, item.type, area, initial)"
       >
-        <span :style="ki == index ? styobj : ''">{{ item }}</span>
+        <span :style="type == item.type ? styobj : ''" :type="item.type">
+          {{ item.name }}
+        </span>
       </a>
     </div>
     <div class="t-con">
@@ -29,16 +33,19 @@
           href="javascript:void 0;"
           v-for="(item, index) of word"
           :key="index"
-          @click="ni = index"
+          @click="update(null, type, area, initialword[index])"
         >
-          <span :style="ni == index ? styobj : ''">
+          <span
+            :style="initial == initialword[index] ? styobj : ''"
+            :initial="initialword[index]"
+          >
             {{ item }}
           </span>
         </a>
       </div>
     </div>
     <div class="songer-list">
-      <div v-for="(item, index) of songerList" :key="index">
+      <div v-for="(item, index) of songer" :key="index">
         <img :src="item.img1v1Url" alt="logo" />
         <p>{{ item.name }}</p>
       </div>
@@ -47,8 +54,21 @@
 </template>
 
 <script>
-let lang = ["全部", "华语", "欧美", "日本", "韩国", "其他"];
-let kind = ["全部", "男歌手", "女歌手", "乐队组合"];
+import { getSongerList } from "@/api/songer.js";
+let lang = [
+  { name: "全部", area: -1 },
+  { name: "华语", area: 7 },
+  { name: "欧美", area: 96 },
+  { name: "日本", area: 8 },
+  { name: "韩国", area: 16 },
+  { name: "其他", area: 0 },
+];
+let kind = [
+  { name: "全部", type: -1 },
+  { name: "男歌手", type: 1 },
+  { name: "女歌手", type: 2 },
+  { name: "乐队组合", type: 3 },
+];
 let word = [
   "热门",
   "A",
@@ -86,19 +106,17 @@ export default {
       word,
       lang,
       kind,
-      li: 0,
-      ki: 0,
-      ni: 0,
+      type: -1,
+      area: -1,
+      initial: -1,
       songer: [],
     };
   },
 
   created() {
-    this.$axios
-      .get("http://localhost:8081/testdata/songer.json")
-      .then(({ data }) => {
-        this.songer = data.artists;
-      });
+    getSongerList().then((res) => {
+      this.songer = res;
+    });
   },
   computed: {
     styobj() {
@@ -107,19 +125,24 @@ export default {
         backgroundColor: "rgb(211, 173, 178)",
       };
     },
-    songerList() {
-      let t = this.songer.map((item) => {
-        return {
-          img1v1Url: item.img1v1Url,
-          name: item.name,
-        };
+    initialword() {
+      const ret = [];
+      for (let i = 1; i < this.word.length - 1; i++) {
+        ret.push(this.word[i].toLowerCase());
+      }
+      ret.unshift(-1);
+      ret.push(0);
+      return ret;
+    },
+  },
+  methods: {
+    update: function (e, type, area, initial) {
+      getSongerList(type, area, initial).then((res) => {
+        this.songer = res;
       });
-      t.unshift({
-        img1v1Url:
-          "http://p2.music.126.net/MJdmNzZwTCz0b4IpHJV6Wg==/109951162865487429.jpg",
-        name: "歌手排行榜",
-      });
-      return t;
+      this.type = type;
+      this.area = area;
+      this.initial = initial;
     },
   },
 };

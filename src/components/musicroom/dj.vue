@@ -1,6 +1,6 @@
 <template>
   <div class="dj-page">
-    <Banner />
+    <Banner :pictures="banner" />
     <div class="help-layer">
       <i
         class="cus-conflict custom-icon custom-icon-Larrow"
@@ -20,7 +20,7 @@
             </div>
             <p>排行榜</p>
           </div>
-          <div class="dj-item" v-for="(item, index) in cmpdjlist" :key="index">
+          <div class="dj-item" v-for="(item, index) in djcate" :key="index">
             <div>
               <img :src="item.pic56x56Url" alt="logo" />
             </div>
@@ -34,7 +34,7 @@
       <i class="custom-icon custom-icon-Right"></i>
     </div>
     <div class="pay-list">
-      <div class="pay-list-item" v-for="(item, index) in paylist" :key="index">
+      <div class="pay-list-item" v-for="(item, index) in highQual" :key="index">
         <img :src="item.picUrl" alt="logo" />
         <div class="list-item-right">
           <p>{{ item.name }}</p>
@@ -54,7 +54,7 @@
     </div>
     <div class="dj-cus">
       <PicList
-        v-for="(item, index) of dj"
+        v-for="(item, index) of redj"
         :key="index"
         :src="item.picUrl"
         :width="140"
@@ -71,6 +71,8 @@
 <script>
 import PicList from "@/components/util/piclist";
 import Banner from "@/components/util/banner";
+import { djBanner, djCategories, payHighQual } from "@/api/dj.js";
+import { getReDj } from "@/api/recommand.js";
 export default {
   name: "Dj",
   components: {
@@ -79,66 +81,19 @@ export default {
   },
   data() {
     return {
+      banner: [],
       djcate: [],
-      list: [],
+      highQual: [],
+      redj: [],
       isScroll: false,
-      recdj: [],
     };
   },
-  async created() {
-    ({
-      data: { categories: this.djcate },
-    } = await this.$axios.get(
-      "http://localhost:8081/testdata/djcatelist.json"
-    ));
-  },
-  async beforeCreate() {
-    ({
-      data: {
-        data: { list: this.list },
-      },
-    } = await this.$axios.get("http://localhost:8081/testdata/djpaygift.json"));
-  },
-  async mounted() {
-    let { data } = await this.$axios.get(
-      "http://localhost:8081/testdata/type.json"
+  created() {
+    Promise.all([djBanner(), djCategories(), payHighQual(), getReDj()]).then(
+      (res) => {
+        [this.banner, this.djcate, this.highQual, this.redj] = [...res];
+      }
     );
-    ({
-      data: { data: this.recdj },
-    } = await this.$axios.get("http://localhost:8081/testdata/redj.json"));
-  },
-  computed: {
-    cmpdjlist() {
-      return this.djcate.map((item) => {
-        return {
-          name: item.name,
-          pic56x56Url: item.pic56x56Url,
-        };
-      });
-    },
-    paylist() {
-      return this.list
-        .map((item) => {
-          return {
-            id: item.id,
-            name: item.name,
-            rcmdText: item.rcmdText,
-            picUrl: item.picUrl,
-            originalPrice: item.originalPrice,
-            lastProgramName: item.lastProgramName,
-          };
-        })
-        .slice(0, 4);
-    },
-    dj() {
-      return this.recdj.map((item) => {
-        return {
-          name: item.name,
-          picUrl: item.picUrl,
-          rcmdtext: item.rcmdtext,
-        };
-      });
-    },
   },
   methods: {
     move(e) {
@@ -269,6 +224,7 @@ export default {
   }
   .dj-cus {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     padding-top: 15px;
   }

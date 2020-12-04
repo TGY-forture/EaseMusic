@@ -10,8 +10,13 @@
     </div>
     <nav class="s-menu">
       <div class="series">
-        <span v-for="(item, index) of label" :key="index">
-          {{ item }}
+        <span
+          v-for="(item, index) of label"
+          :key="index"
+          :style="{ color: item.type == type ? 'black' : 'inherit' }"
+          @click="update(item.type)"
+        >
+          {{ item.name }}
         </span>
       </div>
       <span class="d-span same"
@@ -22,7 +27,7 @@
       >
     </nav>
     <ul class="song-ul">
-      <li v-for="(item, index) of songLists" :key="index">
+      <li v-for="(item, index) of songs" :key="index">
         <span class="sub-f">{{ index + 1 }}</span>
         <div style="position: relative">
           <img :src="item.picUrl" alt="logo" />
@@ -46,41 +51,30 @@
 </template>
 
 <script>
-let label = ["全部", "华语", "欧美", "韩国", "日本"];
+import { getNewSong } from "@/api/latestsong.js";
+let label = [
+  { name: "全部", type: 0 },
+  { name: "华语", type: 7 },
+  { name: "欧美", type: 96 },
+  { name: "韩国", type: 16 },
+  { name: "日本", type: 8 },
+];
 export default {
   name: "LatestSong",
   data() {
-    return {
-      change: false,
-      label,
-      hsongs: [],
-    };
+    return { label, change: false, type: 0, songs: [] };
   },
-  async created() {
-    ({
-      data: { data: this.hsongs },
-    } = await this.$axios.get("http://localhost:8081/testdata/song.json"));
-  },
-  computed: {
-    songLists() {
-      return this.hsongs.map((item) => {
-        return {
-          picUrl: item.album.picUrl,
-          duration: this.parseNum(item.duration),
-          name: item.name,
-          artname: item.artists[0].name,
-          mvid: item.mvid,
-          alias: item.alias[0] ? item.alias[0] : "",
-        };
-      });
-    },
+  created() {
+    getNewSong().then((res) => {
+      this.songs = res;
+    });
   },
   methods: {
-    parseNum(num) {
-      let pnum = Math.trunc(num / 1000);
-      let min = Math.trunc(pnum / 60);
-      let sec = pnum % 60;
-      return min + ":" + sec;
+    update(type) {
+      getNewSong(type).then((res) => {
+        this.songs = res;
+      });
+      this.type = type;
     },
   },
 };

@@ -3,45 +3,51 @@
     <div class="bg-help">
       <div
         class="top"
-        :style="{ backgroundImage: `url(${highQuality.coverImgUrl})` }"
+        :style="{ backgroundImage: `url(${hQuality[0].coverImgUrl})` }"
       ></div>
       <div class="top-top">
-        <img :src="highQuality.coverImgUrl" alt="logo" />
+        <img :src="hQuality[0].coverImgUrl" alt="logo" />
         <div class="descript">
           <div class="hq-entry">
             <i class="custom-icon custom-icon-huangguan"></i>
             <span>精品歌单</span>
           </div>
-          <p style="color: white; margin-bottom: 5px">{{ highQuality.name }}</p>
+          <p style="color: white; margin-bottom: 5px">
+            {{ hQuality[0].name }}
+          </p>
           <p style="color: #bdc3c7; font-size: 14px">
-            {{ highQuality.copywriter }}
+            {{ hQuality[0].copywriter }}
           </p>
         </div>
       </div>
     </div>
     <nav class="cat-items">
       <button @click="showAndHide">
-        {{ highQuality.tag }}<i class="custom-icon custom-icon-Right"></i>
+        {{ hQuality[0].tag }}<i class="custom-icon custom-icon-Right"></i>
       </button>
       <SeriesSelect
         :visible="showcat"
         :back="showdetail"
+        :categories="categories"
+        :selectcat="subcat"
+        :tag="hQuality[0].tag"
         @close="showcat = false"
+        @labelchange="change"
       />
       <span
-        v-for="(name, index) in hotCat"
+        v-for="(item, index) in hotlabel"
         :key="index"
         :style="{ marginLeft: index == 0 ? 'auto' : '2px' }"
-        :class="index == catidx ? 'select' : ''"
+        :class="item.name == hQuality[0].tag ? 'select' : ''"
         class="s-conflit"
-        @click="change(index)"
+        @click="change(item.name)"
       >
-        {{ name }}
+        {{ item.name }}
       </span>
     </nav>
     <div class="single-song">
       <PicList
-        v-for="(item, index) in mlist"
+        v-for="(item, index) in playlists"
         :key="index"
         :src="item.coverImgUrl"
         :width="180"
@@ -49,7 +55,7 @@
         :playcnt="item.playCount"
         :ptext="item.name"
         :djtext="item.nickname"
-        :identifyIcon="item.identifyIcon"
+        :identifyIcon="item.icon"
         inmlist
       />
     </div>
@@ -59,6 +65,13 @@
 <script>
 import PicList from "@/components/util/piclist";
 import SeriesSelect from "@/components/util/seriesselect";
+import {
+  songCategory,
+  hotCategory,
+  highQuality,
+  playLists,
+} from "@/api/songlist.js";
+
 export default {
   name: "MusicList",
   components: {
@@ -67,64 +80,38 @@ export default {
   },
   data() {
     return {
-      seriesmusic: [],
-      tags: [],
-      hqsrc: [],
-      catidx: 0,
-      selectcat: [],
+      hQuality: [{}],
+      hotlabel: [],
+      playlists: [],
       categories: {},
+      subcat: [],
       showcat: false,
       showdetail: false,
     };
   },
   async created() {
-    ({
-      data: { tags: this.tags },
-    } = await this.$axios.get("http://localhost:8081/testdata/mhotcat.json"));
-  },
-  async beforeMount() {
-    ({
-      data: {
-        playlists: [this.hqsrc],
-      },
-    } = await this.$axios.get(
-      "http://localhost:8081/testdata/highquality.json"
-    ));
-  },
-  async mounted() {
-    ({
-      data: { playlists: this.seriesmusic },
-    } = await this.$axios.get("http://localhost:8081/testdata/playlist.json"));
-  },
-  computed: {
-    highQuality() {
-      return {
-        name: this.hqsrc.name,
-        coverImgUrl: this.hqsrc.coverImgUrl,
-        copywriter: this.hqsrc.copywriter,
-        tag: this.hqsrc.tag,
-      };
-    },
-    hotCat() {
-      return this.tags.map((item) => {
-        return item.name;
-      });
-    },
-    mlist() {
-      return this.seriesmusic.map((item) => {
-        return {
-          name: item.name,
-          coverImgUrl: item.coverImgUrl,
-          playCount: item.playCount,
-          identifyIcon: item.creator.avatarDetail?.identityIconUrl,
-          nickname: item.creator.nickname,
-        };
-      });
-    },
+    Promise.all([
+      highQuality("华语"),
+      hotCategory(),
+      songCategory(),
+      playLists("华语"),
+    ]).then((res) => {
+      [
+        this.hQuality,
+        this.hotlabel,
+        { categories: this.categories, subcat: this.subcat },
+        this.playlists,
+      ] = [...res];
+    });
   },
   methods: {
-    change(i) {
-      this.catidx = i;
+    change(name) {
+      highQuality(name).then((newhquality) => {
+        this.hQuality = newhquality;
+      });
+      playLists(name).then((newlist) => {
+        this.playlists = newlist;
+      });
     },
     showAndHide() {
       if (!this.showcat) {
