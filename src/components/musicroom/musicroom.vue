@@ -2,14 +2,15 @@
   <div class="musicroom">
     <h1>音乐馆</h1>
     <div class="category">
-      <a
-        href="javascript:void 0;"
+      <router-link
         v-for="(item, index) in category"
         :key="index"
-        @click="toRouter(item.name)"
+        :to="{ name: item.name }"
+        exact
+        exact-active-class="t-active"
       >
         {{ item.text }}
-      </a>
+      </router-link>
     </div>
     <router-view></router-view>
   </div>
@@ -49,11 +50,6 @@ export default {
       category,
     };
   },
-  methods: {
-    toRouter(name) {
-      this.$router.push({ name });
-    },
-  },
 };
 </script>
 
@@ -76,21 +72,22 @@ export default {
     margin-left: 20px;
   }
   .category {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     margin-left: 20px;
     a {
       color: grey;
       font-size: 16px;
       margin-right: 26px;
-      padding: 6px 0;
-      border-radius: 0 0 1px 1px;
+      padding: 6px 0 0 0;
       transition: transform 0.1s;
       display: inline-block;
       font-family: "Courier New", Courier, monospace;
-      &:hover {
-        // border-bottom: 3px solid rgb(218, 13, 13);
-        transform: scale(1.2, 1.2);
-      }
+      border-bottom: 3px solid #f7f7f7;
+    }
+    .t-active {
+      transform: scale(1.2, 1.2);
+      color: black;
+      border-bottom: 3px solid rgb(194, 21, 21);
     }
   }
 }
