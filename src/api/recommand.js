@@ -1,5 +1,8 @@
 import axios from "axios";
 
+/**
+ * @description: 获取每日推荐页轮播图数据
+ */
 async function getReBanner() {
   const {
     data: { banners },
@@ -14,6 +17,9 @@ async function getReBanner() {
     };
   });
 }
+/**
+ * @description: 个性推荐音乐
+ */
 async function getDailyReList() {
   const {
     data: { result },
@@ -28,6 +34,9 @@ async function getDailyReList() {
     };
   });
 }
+/**
+ * @description: 独家放送
+ */
 async function privateContent() {
   const {
     data: { result },
@@ -42,6 +51,9 @@ async function privateContent() {
     };
   });
 }
+/**
+ * @description: 最新音乐
+ */
 async function getNewSongs() {
   const {
     data: { data },
@@ -62,6 +74,9 @@ async function getNewSongs() {
   });
 }
 
+/**
+ * @description: 推荐mv
+ */
 async function getReMv() {
   const { data: { result } } = await axios.get('http://localhost:3000/personalized/mv')
   return result.map((item) => {
@@ -77,6 +92,9 @@ async function getReMv() {
   })
 }
 
+/**
+ * @description: 主播电台
+ */
 async function getReDj() {
   const { data: { data } } = await axios.get('http://localhost:3000/dj/personalize/recommend')
   return data.map((item) => {
