@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-11-18 10:06:52
  * @LastEditors: tgy
- * @LastEditTime: 2020-11-25 11:26:27
+ * @LastEditTime: 2020-12-04 20:08:02
  * @Author: tgy
  */
 import Vue from 'vue'
@@ -15,6 +15,11 @@ VueRouter.prototype.push = function push(location) {
 }
 
 let musicroom = () => import('@/components/musicroom/musicroom')
+let films = () => import('@/components/video/video')
+let cloudpan = () => import('@/components/cloudpan/cloudpan')
+let history = () => import('@/components/history/history')
+let collection = () => import('@/components/collection/collection')
+let like = () => import('@/components/like/like')
 let musiclist = () => import('@/components/musicroom/musiclist')
 let dj = () => import('@/components/musicroom/dj')
 let latestsong = () => import('@/components/musicroom/latestsong')
@@ -25,39 +30,69 @@ let recommand = () => import('@/components/musicroom/recommand')
 const routes = [
   {
     path: '/',
-    redirect: '/recommand',
+    redirect: '/films',
+  },
+  {
+    path: '/musicroom',
     name: 'musicroom',
+    redirect: '/musicroom/recommand',
     component: musicroom,
-    children: [{
-      path: 'musiclist',
-      name: 'musiclist',
-      component: musiclist
-    },
-    {
-      path: 'songer',
-      name: 'songer',
-      component: songer
-    },
-    {
-      path: 'dj',
-      name: 'dj',
-      component: dj
-    },
-    {
-      path: 'latestsong',
-      name: 'latestsong',
-      component: latestsong
-    },
-    {
-      path: 'toplist',
-      name: 'toplist',
-      component: toplist
-    },
-    {
-      path: 'recommand',
-      name: 'recommand',
-      component: recommand
-    },]
+    children: [
+      {
+        path: 'musiclist',
+        name: 'musiclist',
+        component: musiclist
+      },
+      {
+        path: 'songer',
+        name: 'songer',
+        component: songer
+      },
+      {
+        path: 'dj',
+        name: 'dj',
+        component: dj
+      },
+      {
+        path: 'latestsong',
+        name: 'latestsong',
+        component: latestsong
+      },
+      {
+        path: 'toplist',
+        name: 'toplist',
+        component: toplist
+      },
+      {
+        path: 'recommand',
+        name: 'recommand',
+        component: recommand
+      },]
+  },
+  {
+    path: '/films',
+    name: 'films',
+    component: films
+  },
+  {
+    path: "/history",
+    name: 'history',
+    component: history
+  },
+  {
+    path: "/cloudpan",
+    name: 'cloudpan',
+    component: cloudpan
+  },
+  {
+    path: "/collection",
+    name: 'collection',
+    component: collection
+  },
+  {
+    path: "/like",
+    name: 'like',
+    component: like
   }
 ]
 
