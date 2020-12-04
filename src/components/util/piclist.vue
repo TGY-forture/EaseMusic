@@ -7,6 +7,7 @@
   >
     <div
       :style="{
+        width: '100%',
         backgroundColor: color,
         borderRadius: '6px',
         position: 'relative',
@@ -35,7 +36,7 @@
     </div>
     <div class="n-pcnt" v-if="rightUp">
       <i class="custom-icon custom-icon-play2"></i>
-      <span>{{ playcnt }}</span>
+      <span>{{ tranDate }}</span>
     </div>
     <i class="custom-icon custom-icon-play3 lu-icon" v-if="leftUpIcon"></i>
     <i
@@ -53,6 +54,7 @@
 
 <script>
 export default {
+  name: "PicList",
   props: {
     src: { type: String, required: true },
     width: { type: Number, required: true },
@@ -63,7 +65,7 @@ export default {
     playcnt: { type: Number, default: 0 },
     ptext: { type: String, default: "" },
     color: { type: String, default: "white" },
-    date: { type: String, deault: "" },
+    date: { type: Number, deault: 0 },
     artist: { type: String, default: "" },
     djtext: { type: String, default: "" },
     identifyIcon: { default: "" },
@@ -74,7 +76,16 @@ export default {
       show: false,
     };
   },
-  name: "PicList",
+  computed: {
+    tranDate() {
+      if (this.playcnt < 10000) {
+        return this.playcnt;
+      } else {
+        let tmp = Math.trunc(this.playcnt / 10000) + "万";
+        return tmp;
+      }
+    },
+  },
 };
 </script>
 
@@ -118,7 +129,7 @@ export default {
   .mdate {
     position: absolute;
     top: 35%;
-    left: 42%;
+    left: 44%;
     font-size: 20px;
     font-weight: bold;
     color: #dd001b;

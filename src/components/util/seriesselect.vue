@@ -17,7 +17,12 @@
           <span>{{ value }}</span>
         </div>
         <div class="right">
-          <span v-for="(item, subidx) in diffcat[index]" :key="subidx">
+          <span
+            v-for="(item, subidx) in diffcat[index]"
+            :key="subidx"
+            :class="item.name == tag ? 'currsel' : ''"
+            @click="change(item.name)"
+          >
             {{ item.name }}
           </span>
         </div>
@@ -44,11 +49,12 @@ export default {
       default: false,
     },
     back: { type: Boolean, default: true },
+    selectcat: { type: Array, required: true },
+    categories: { type: Object, required: true },
+    tag: { required: true },
   },
   data() {
     return {
-      selectcat: [],
-      categories: {},
       icon,
       colors,
     };
@@ -66,11 +72,6 @@ export default {
       return res;
     },
   },
-  async created() {
-    ({
-      data: { sub: this.selectcat, categories: this.categories },
-    } = await this.$axios.get("http://localhost:8081/testdata/mcatlist.json"));
-  },
   mounted() {
     this.$refs.pop.addEventListener("animationend", this.aniEnd);
   },
@@ -79,6 +80,9 @@ export default {
       if (e.animationName == "tFadeOut") {
         this.$emit("close");
       }
+    },
+    change(name) {
+      this.$emit("labelchange", name);
     },
   },
 };
@@ -145,9 +149,12 @@ export default {
           border-radius: 12px;
           cursor: pointer;
           &:hover {
-            background-color: #f0d1d1;
             color: #ec4141;
           }
+        }
+        .currsel {
+          background-color: #f0d1d1;
+          color: #ec4141;
         }
       }
     }
