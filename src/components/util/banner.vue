@@ -1,8 +1,8 @@
 <template>
   <div class="t-banner" @mouseenter="show = true" @mouseleave="show = false">
     <img
-      v-for="(src, index) in piecepic"
-      :src="src"
+      v-for="(item, index) in piecepic"
+      :src="item.imageUrl || item.pic"
       :key="index"
       :style="state[index]"
       :class="mid && index == indexloop[1] ? 'jumpchange' : ''"
@@ -12,7 +12,7 @@
     <div class="dot-all">
       <span
         class="dot"
-        v-for="i in 10"
+        v-for="i in pictures.length"
         :key="i"
         @mouseenter="indexChange(i - 1)"
         :style="{ backgroundColor: i - 1 == index ? '#EA2027' : '#bdc3c7' }"
@@ -28,41 +28,16 @@
 </template>
 
 <script>
-let bannerpics = [
-  require("../../assets/img/0.jpg"),
-  require("../../assets/img/1.jpg"),
-  require("../../assets/img/2.jpg"),
-  require("../../assets/img/3.jpg"),
-  require("../../assets/img/4.jpg"),
-  require("../../assets/img/5.jpg"),
-  require("../../assets/img/6.jpg"),
-  require("../../assets/img/7.jpg"),
-  require("../../assets/img/8.jpg"),
-  require("../../assets/img/9.jpg"),
-];
-//状态样式
-let continusState = [
-  {
-    left: 0,
-    transform: "scale(1,1)",
-    "z-index": 0,
-  },
-  {
-    left: "25%",
-    transform: "scale(1.25,1.25)",
-    "z-index": 3,
-  },
-  {
-    left: "360px",
-    "z-index": 0,
-    transform: "scale(1,1)",
-  },
-];
 export default {
   name: "Banner",
+  props: {
+    pictures: {
+      type: Array,
+      required: true,
+    },
+  },
   data() {
     return {
-      bannerpics,
       state: [
         {
           left: 0,
@@ -80,24 +55,43 @@ export default {
           transform: "scale(1,1)",
         },
       ],
-      piecepic: bannerpics.slice(0, 3),
+      piecepic: [],
       bannerindex: 3, //下一个需要显示的图片索引
       show: false,
       index: 0, //指示点位置
       indexloop: [0, 1, 2], //界面图片从左到右对应索引(reactive)
       jump: false, //跳变标志
       mid: false, //中间图片切换缩放标志
+      timer: 0,
     };
+  },
+  computed: {
+    edge() {
+      //图片边界索引
+      return this.pictures.length - 1;
+    },
+    gap() {
+      //间隔点边界索引
+      return this.pictures.length - 3;
+    },
+  },
+  watch: {
+    pictures: function (npic) {
+      this.piecepic = npic.slice(0, 3);
+      this.bannerindex = npic.length > 3 ? 3 : 0;
+    },
+  },
+  mounted() {
+    // this.timer = setInterval(this.change, 5000);
+  },
+  destroyed() {
+    clearInterval(this.timer);
   },
   methods: {
     change() {
-      // setInterval(() => {
-      this.index++;
-      if (this.index > 9) {
-        this.index = 0;
-      }
+      this.index = this.index + 1 > this.edge ? 0 : this.index + 1;
       //更新新的图片
-      this.piecepic[this.indexloop[0]] = this.bannerpics[this.bannerindex];
+      this.piecepic[this.indexloop[0]] = this.pictures[this.bannerindex];
       //关键逻辑在于让状态得以维系，便可不做其他复杂判断
       if (this.jump) {
         this.state.push(this.state.shift());
@@ -106,24 +100,22 @@ export default {
       }
       //
       this.indexloop.push(this.indexloop.shift());
-      this.bannerindex++;
-      if (this.bannerindex > 9) {
-        this.bannerindex = 0;
-      }
-      // }, 5000);
+      this.bannerindex =
+        this.bannerindex + 1 > this.edge ? 0 : this.bannerindex + 1;
     },
     reChange() {
-      this.bannerindex--;
-      if (this.bannerindex < 0) {
-        this.bannerindex = 9;
-      }
-      this.index--;
-      if (this.index < 0) {
-        this.index = 9;
-      }
+      //逆序返回时，下一张图片的索引应该对应回退
+      this.bannerindex =
+        this.bannerindex - 1 < 0 ? this.edge : this.bannerindex - 1;
+      //
+      this.index = this.index - 1 < 0 ? this.edge : this.index - 1;
+      //找到回退时应该显示的第一张图片索引
       let index =
-        this.bannerindex < 3 ? this.bannerindex + 7 : this.bannerindex - 3;
-      this.piecepic[this.indexloop[2]] = this.bannerpics[index];
+        this.bannerindex < 3
+          ? this.bannerindex + (this.edge - 2)
+          : this.bannerindex - 3;
+      //图片赋值
+      this.piecepic[this.indexloop[2]] = this.pictures[index];
       //关键逻辑
       if (this.jump) {
         this.state.unshift(this.state.pop());
@@ -135,10 +127,10 @@ export default {
     },
     indexChange(index) {
       let distance = index - this.index; //获取两点差值
-      if (distance == 1 || distance == -9) {
+      if (distance == 1 || distance == -this.edge) {
         this.change();
         return;
-      } else if (distance == -1 || distance == 9) {
+      } else if (distance == -1 || distance == this.edge) {
         this.reChange();
         return;
       } else if (distance == 0) {
@@ -148,11 +140,11 @@ export default {
       this.mid = true; //中间图片应用缩放动画
       this.index = index;
       for (let i = index, j = 0; i < index + 3; i++, j++) {
-        let t = i > 9 ? i - 10 : i;
-        this.piecepic[this.indexloop[2 - j]] = this.bannerpics[t]; //改变三幅图片
+        let t = i > this.edge ? i - (this.edge + 1) : i;
+        this.piecepic[this.indexloop[2 - j]] = this.pictures[t]; //改变三幅图片
       }
       //得到下一个应该显示的图片(fuck,找了好半天的 bug)
-      this.bannerindex = index + 3 > 9 ? index - 7 : index + 3;
+      this.bannerindex = index + 3 > this.edge ? index - this.gap : index + 3;
       this.jump = !this.jump; //改变标志，执行不同的状态转移
       let leftindex = this.indexloop[0]; //当前位于左侧的图片
       let rightindex = this.indexloop[2]; //当前位于右侧的图片
@@ -187,7 +179,7 @@ export default {
     width: 360px;
     height: 140px;
     border-radius: 6px;
-    transition: all 0.5s;
+    transition: all 0.7s;
     position: absolute;
     cursor: pointer;
   }
@@ -228,7 +220,7 @@ export default {
     left: 20px;
   }
   .jumpchange {
-    animation: 0.5s zoomback;
+    animation: 0.7s zoomback;
   }
 }
 </style>
