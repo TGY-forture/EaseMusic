@@ -28,10 +28,16 @@ async function getSongDetail(sid) {
       author: item.ar[0].name,
       alia: item.alia[0],
       al: item.al.name,
+      picUrl: item.al.picUrl,
       dt: item.dt,
       mv: item.mv
     }
   })
 }
 
-export { getLikes, getLists, getSongDetail }
+async function getMp3Url(id) {
+  const { data: { data } } = await axios.get(`http://localhost:3000/song/url?id=${id}`)
+  return data[0].url
+}
+
+export { getLikes, getLists, getSongDetail, getMp3Url }
