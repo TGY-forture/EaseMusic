@@ -2,49 +2,58 @@ import axios from "axios";
 
 async function getAlbum() {
   const {
-    data: { data },
+    data: { data, count },
   } = await axios.get("http://localhost:3000/album/sublist");
-  return data.map((item) => {
+  const info = data.map((item) => {
     return {
       picUrl: item.picUrl,
       name: item.name,
       size: item.size,
-      artist: item.artist[0].name,
-      count: item.count
+      artist: item.artists[0].name,
     };
   });
+  return {
+    count,
+    info
+  }
 }
 
 async function getSonger() {
   const {
-    data: { data },
+    data: { data, count },
   } = await axios.get("http://localhost:3000/artist/sublist");
-  return data.map((item) => {
+  const info = data.map((item) => {
     return {
       picUrl: item.picUrl,
       name: item.name,
       albumSize: item.albumSize,
-      mvSize: item.mvSize,
-      count: item.count
+      mvSize: item.mvSize
     };
   });
+  return {
+    count,
+    info
+  }
 }
 
 async function getMv() {
   const {
-    data: { data },
+    data: { data, count },
   } = await axios.get("http://localhost:3000/mv/sublist");
-  return data.map((item) => {
+  const info = data.map((item) => {
     return {
       title: item.title,
       durationms: item.durationms,
       playTime: item.playTime,
       coverUrl: item.coverUrl,
-      name: item.creator.userName,
+      name: item.creator[0].userName,
       vid: item.vid,
-      count: item.count
     };
   });
+  return {
+    count,
+    info
+  }
 }
 
 export { getAlbum, getSonger, getMv };
