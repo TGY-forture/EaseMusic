@@ -179,7 +179,7 @@ export default {
     width: 360px;
     height: 140px;
     border-radius: 6px;
-    transition: all 0.7s;
+    transition: all 0.5s;
     position: absolute;
     cursor: pointer;
   }
