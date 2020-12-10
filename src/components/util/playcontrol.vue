@@ -6,27 +6,43 @@
         <p>
           <span>{{ song.name }}</span>
           <i class="custom-icon custom-icon-heart1"></i>
-          <i v-if="starts !== '00:00'" class="custom-icon custom-icon-vip"></i>
+          <i
+            v-if="rawstart !== '00:00'"
+            class="custom-icon custom-icon-vip"
+          ></i>
         </p>
         <p>{{ song.author }}</p>
       </div>
     </div>
-    <audio ref="music" :src="mp3url" @ended="play = false"></audio>
+    <audio
+      ref="music"
+      :src="mp3url"
+      @ended="play = false"
+      @timeupdate="play ? update() : null"
+    >
+      <!-- 动态绑定方法时加上调用括号 -->
+    </audio>
     <div class="t-ctrl">
       <div>
-        <span><i class="custom-icon custom-icon-loop"></i></span>
+        <span @click="modeChange">
+          <i
+            class="custom-icon"
+            :class="mode == 0 ? 'custom-icon-exe-random' : 'custom-icon-order'"
+          ></i>
+        </span>
         <span @click="previous">
-          <i class="custom-icon custom-icon-previous"></i
-        ></span>
+          <i class="custom-icon custom-icon-previous"></i>
+        </span>
         <span @click="playAndStop">
           <i
             class="custom-icon"
             :class="play ? 'custom-icon-pause' : 'custom-icon-play'"
-          ></i>
+          >
+          </i>
         </span>
         <span @click="next"><i class="custom-icon custom-icon-start"></i></span>
         <!-- <i class="custom-icon custom-icon-order"></i> -->
-        <!-- <i class="custom-icon custom-icon-exe-random"></i> -->
+        <!-- <i class="custom-icon custom-icon-loop"></i> -->
       </div>
       <div ref="pro" @mouseup="restPlay">
         <p
@@ -69,7 +85,10 @@ export default {
       mp3url: "",
       play: false,
       song: {},
+      rawstart: "00:00",
       starts: "00:00",
+      mode: 0,
+      index: -1,
     };
   },
   computed: {
@@ -79,15 +98,18 @@ export default {
   mounted() {
     this.getLoveMusic()
       .then(() => {
-        this.song = this.playlist[this.randomIndex()];
+        this.index = this.randomIndex();
+        this.song = this.playlist[this.index];
         return getMp3Url(this.song.id);
       })
       .then((res) => {
         this.mp3url = res.url;
         if (res.start) {
           this.starts = this.timeTrans(res.start, false);
+          this.rawstart = this.starts;
         } else {
           this.starts = "00:00";
+          this.rawstart = this.starts;
         }
       })
       .catch((err) => {
@@ -97,12 +119,15 @@ export default {
   methods: {
     ...mapActions(["getLoveMusic"]),
     restPlay(e) {
-      this.addtran = true;
-      this.past = e.offsetX;
-      this.sleft = e.offsetX - 4;
+      this.addtran = true; //改变播放按钮样式
+      const rate = (e.offsetX / 400).toPrecision(2); //获取点击处偏移与进度条总长比值
+      this.$refs.music.currentTime = (this.song.dt / 1000) * rate; //设置时间
+      this.past = e.offsetX; //更新已播放进度条长度
+      this.sleft = e.offsetX - 4; //更新指示点位置
     },
     playAndStop() {
       if (!this.play) {
+        //当前处于暂停状态，则播放
         this.$refs.music.play();
         this.play = true;
       } else {
@@ -111,34 +136,39 @@ export default {
       }
     },
     addMove(e) {
+      //鼠标按下事件
+      this.play = false;
       this.addtran = false;
-      this.$refs.pro.addEventListener("mousemove", this.drag);
+      this.$refs.music.pause(); //点击指示点时，应暂停音乐
+      this.$refs.pro.addEventListener("mousemove", this.drag); //添加 mousemove事件
     },
     cancelMove(e) {
-      e.stopPropagation();
-      this.$refs.pro.removeEventListener("mousemove", this.drag);
+      //鼠标抬起事件
+      this.play = true;
+      this.$refs.music.play(); //继续播放
+      e.stopPropagation(); //阻止冒泡
+      this.$refs.pro.removeEventListener("mousemove", this.drag); //移除 mousemove事件
     },
     drag(e) {
+      //鼠标点击指示点拖动事件
       const tag = e.target.tagName;
       if (tag == "DIV" || tag == "P") {
-        this.past = e.offsetX;
+        const rate = (e.offsetX / 400).toPrecision(2); //获得当前位置与进度条总长度比值
+        this.$refs.music.currentTime = (this.song.dt / 1000) * rate; //更新播放时间
+        this.past = e.offsetX; //
         this.sleft = e.offsetX - 4;
       }
     },
-    previous() {
-      this.song = this.playlist[this.randomIndex()];
-      getMp3Url(this.song.id)
-        .then((res) => {
-          this.mp3url = res.url;
-          if (res.start) {
-            this.starts = this.timeTrans(res.start, false);
-          } else {
-            this.starts = "00:00";
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+    async previous() {
+      if (this.mode == 0) {
+        this.index = this.randomIndex();
+      } else if (this.mode == 1) {
+        this.index = this.index + 1 >= this.len ? 0 : this.index + 1;
+      }
+      let res = await this.uniGetInfo(this.playlist[this.index].id);
+      if (!res.url) {
+        this.previous();
+      }
     },
     next() {},
     addVol() {
@@ -149,7 +179,6 @@ export default {
         vol = vol + 0.1;
       }
       this.$refs.music.volume = vol;
-      console.log(this.$refs.music.volume);
     },
     subVol() {
       let vol = this.$refs.music.volume;
@@ -159,10 +188,20 @@ export default {
         vol = vol - 0.1;
       }
       this.$refs.music.volume = vol;
-      console.log(this.$refs.music.volume);
+    },
+    modeChange() {
+      if (this.mode == 0) {
+        this.mode = 1;
+      } else {
+        this.mode = 0;
+      }
     },
     update() {
-      console.log(1);
+      const sec = Math.trunc(this.song.dt / 1000);
+      const rate = Number((this.$refs.music.currentTime / sec).toFixed(2));
+      this.past = rate * 400;
+      this.sleft = this.past - 4;
+      this.starts = this.timeTrans(this.$refs.music.currentTime, false);
     },
     randomIndex() {
       let rand = Math.random();
@@ -170,7 +209,7 @@ export default {
       return idx;
     },
     timeTrans(dt, isms) {
-      let sec = dt;
+      let sec = parseInt(dt);
       if (isms) {
         sec = parseInt(dt / 1000);
       }
@@ -180,6 +219,22 @@ export default {
         cs = "0" + cs;
       }
       return "0" + min + ":" + cs;
+    },
+    async uniGetInfo(id) {
+      const songmes = await getMp3Url(id);
+      let res = {
+        url: songmes.url,
+      };
+      if (songmes.start) {
+        res.start = this.timeTrans(songmes.start, false);
+      } else {
+        res.start = "00:00";
+      }
+      if (res.url && res.start) {
+        this.mp3url = res.url;
+        this.rawstart = res.start;
+      }
+      return res;
     },
   },
 };
@@ -275,7 +330,9 @@ export default {
       .custom-icon-start {
         font-size: 14px;
       }
-      .custom-icon-pause {
+      .custom-icon-pause,
+      .custom-icon-exe-random,
+      .custom-icon-order {
         font-size: 20px;
       }
     }
@@ -289,7 +346,8 @@ export default {
       p {
         width: 50%;
         height: 100%;
-        background-color: rgb(197, 191, 191);
+        // background-color: rgb(197, 191, 191);
+        background-color: rgb(64, 70, 70);
         margin-bottom: 0;
         border-radius: 2px;
       }
