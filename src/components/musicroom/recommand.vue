@@ -52,12 +52,15 @@
           <img :src="item.picUrl" alt="logo" />
           <div>
             <p>{{ item.name }}</p>
-            <i
-              class="custom-icon custom-icon-MV"
-              v-show="item.mvid != 0 ? true : false"
-            ></i>
-            <i class="custom-icon custom-icon-sq"></i>
-            <span>{{ item.artists }}</span>
+            <p>
+              <i
+                class="custom-icon custom-icon-MV"
+                v-show="item.mvid != 0 ? true : false"
+              ></i>
+
+              <i class="custom-icon custom-icon-sq"></i>
+              <span>{{ item.artists }}</span>
+            </p>
           </div>
           <i class="custom-icon custom-icon-play3"></i>
         </li>
