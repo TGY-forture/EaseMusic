@@ -17,6 +17,7 @@
     <audio
       ref="music"
       :src="mp3url"
+      @canplay.once="$refs.music.currentTime = vipstart"
       @ended="play = false"
       @timeupdate="play ? update() : null"
     >
@@ -30,7 +31,7 @@
             :class="mode == 0 ? 'custom-icon-exe-random' : 'custom-icon-order'"
           ></i>
         </span>
-        <span @click="previous">
+        <span @click="next(true)">
           <i class="custom-icon custom-icon-previous"></i>
         </span>
         <span @click="playAndStop">
@@ -40,9 +41,9 @@
           >
           </i>
         </span>
-        <span @click="next"><i class="custom-icon custom-icon-start"></i></span>
-        <!-- <i class="custom-icon custom-icon-order"></i> -->
-        <!-- <i class="custom-icon custom-icon-loop"></i> -->
+        <span @click="next(false)"
+          ><i class="custom-icon custom-icon-start"></i
+        ></span>
       </div>
       <div ref="pro" @mouseup="restPlay">
         <p
@@ -66,17 +67,24 @@
       <i class="custom-icon custom-icon-laba"></i>
       <i class="custom-icon custom-icon-sub" @click="subVol"></i>
       <i class="custom-icon custom-icon-plus" @click="addVol"></i>
-      <span>词</span>
+      <span @click="lyricshow = !lyricshow">词</span>
     </div>
     <i class="custom-icon custom-icon--back"></i>
+    <Lyrics :show="lyricshow" :id="song.id" />
   </div>
 </template>
 
 <script>
 import { getMp3Url } from "@/api/like/like.js";
 import { mapState, mapGetters, mapActions } from "vuex";
+import Lyrics from "@/components/util/lyrics";
+import Bus from "@/assets/bus.js";
+
 export default {
   name: "playcontrol",
+  components: {
+    Lyrics,
+  },
   data() {
     return {
       past: 0,
@@ -89,6 +97,9 @@ export default {
       starts: "00:00",
       mode: 0,
       index: -1,
+      vipstart: 0,
+      vipend: 0,
+      lyricshow: false,
     };
   },
   computed: {
@@ -103,13 +114,21 @@ export default {
         return getMp3Url(this.song.id);
       })
       .then((res) => {
-        this.mp3url = res.url;
-        if (res.start) {
-          this.starts = this.timeTrans(res.start, false);
-          this.rawstart = this.starts;
+        if (res.url) {
+          this.mp3url = res.url;
+          if (res.start) {
+            this.starts = this.timeTrans(res.start, false);
+            this.rawstart = this.starts;
+            let r = ((res.start * 1000) / this.song.dt).toPrecision(2);
+            this.past = Number(r) * 400;
+            this.sleft = this.past - 4;
+          } else {
+            this.starts = "00:00";
+            this.past = 0;
+            this.sleft = -4;
+          }
         } else {
-          this.starts = "00:00";
-          this.rawstart = this.starts;
+          this.next(false);
         }
       })
       .catch((err) => {
@@ -134,6 +153,7 @@ export default {
         this.$refs.music.pause();
         this.play = false;
       }
+      Bus.$emit("pauseOrPlay", this.play);
     },
     addMove(e) {
       //鼠标按下事件
@@ -159,18 +179,32 @@ export default {
         this.sleft = e.offsetX - 4;
       }
     },
-    async previous() {
+    async next(flag) {
+      Bus.$emit("nextChange");
+      if (this.play) {
+        this.$refs.music.pause();
+        this.play = false;
+      }
+      //重置新歌状态
+      this.past = 0;
+      this.sleft = -4;
+      this.vipend = 0;
+      this.vipstart = 0;
+
       if (this.mode == 0) {
         this.index = this.randomIndex();
       } else if (this.mode == 1) {
-        this.index = this.index + 1 >= this.len ? 0 : this.index + 1;
+        if (flag) {
+          this.index = this.index - 1 < 0 ? this.len - 1 : this.index - 1;
+        } else {
+          this.index = this.index + 1 > this.len - 1 ? 0 : this.index + 1;
+        }
       }
-      let res = await this.uniGetInfo(this.playlist[this.index].id);
+      let res = await this.uniGetInfo(this.playlist[this.index]);
       if (!res.url) {
-        this.previous();
+        this.next();
       }
     },
-    next() {},
     addVol() {
       let vol = this.$refs.music.volume;
       if (vol + 0.1 > 1) {
@@ -199,9 +233,20 @@ export default {
     update() {
       const sec = Math.trunc(this.song.dt / 1000);
       const rate = Number((this.$refs.music.currentTime / sec).toFixed(2));
-      this.past = rate * 400;
-      this.sleft = this.past - 4;
-      this.starts = this.timeTrans(this.$refs.music.currentTime, false);
+      if (this.vipend > 0) {
+        const base = Number(
+          ((this.vipstart * 1000) / this.song.dt).toPrecision(3)
+        );
+        this.past = (rate + base) * 400;
+        this.sleft = this.past - 4;
+      } else {
+        this.past = rate * 400;
+        this.sleft = this.past - 4;
+      }
+      this.starts = this.timeTrans(
+        this.$refs.music.currentTime + this.vipstart,
+        false
+      );
     },
     randomIndex() {
       let rand = Math.random();
@@ -220,8 +265,8 @@ export default {
       }
       return "0" + min + ":" + cs;
     },
-    async uniGetInfo(id) {
-      const songmes = await getMp3Url(id);
+    async uniGetInfo(song) {
+      const songmes = await getMp3Url(song.id);
       let res = {
         url: songmes.url,
       };
@@ -230,9 +275,18 @@ export default {
       } else {
         res.start = "00:00";
       }
-      if (res.url && res.start) {
+      if (res.url) {
         this.mp3url = res.url;
         this.rawstart = res.start;
+        this.starts = res.start;
+        this.song = song;
+        if (res.start != "00:00") {
+          let r = ((songmes.start * 1000) / this.song.dt).toPrecision(2);
+          this.past = Number(r) * 400;
+          this.sleft = this.past - 4;
+          this.vipstart = songmes.start;
+          this.vipend = songmes.end;
+        }
       }
       return res;
     },
@@ -373,7 +427,7 @@ export default {
     .r-time {
       font-size: 12px;
       position: absolute;
-      right: -34px;
+      right: -40px;
       bottom: -1px;
     }
   }
