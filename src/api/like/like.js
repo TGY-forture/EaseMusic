@@ -30,14 +30,18 @@ async function getSongDetail(sid) {
       al: item.al.name,
       picUrl: item.al.picUrl,
       dt: item.dt,
-      mv: item.mv
+      mv: item.mv,
     }
   })
 }
 
 async function getMp3Url(id) {
   const { data: { data } } = await axios.get(`http://localhost:3000/song/url?id=${id}`)
-  return data[0].url
+  return {
+    url: data[0].url,
+    start: data[0].freeTrialInfo ? data[0].freeTrialInfo.start : undefined,
+    end: data[0].freeTrialInfo ? data[0].freeTrialInfo.end : undefined
+  }
 }
 
 export { getLikes, getLists, getSongDetail, getMp3Url }
