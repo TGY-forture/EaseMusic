@@ -1,8 +1,7 @@
 <template>
-  <div class="lyrics" v-show="show">
+  <div class="lyrics" :class="{ lyrdis: show }">
     <p>{{ showtext }}</p>
     <p ref="top" :style="trans">{{ showtext }}</p>
-    <p>ccc</p>
   </div>
 </template>
 
@@ -26,6 +25,8 @@ export default {
       transname: "width",
       width: "0",
       remaintime: -1,
+      ischange: false,
+      pointmove: false,
     };
   },
   computed: {
@@ -50,7 +51,7 @@ export default {
   },
   mounted() {
     Bus.$on("pauseOrPlay", this.showLyric);
-    // Bus.$on("nextChange", this.reset);
+    Bus.$on("seek", this.seek);
     this.$refs.top.addEventListener("transitioncancel", this.tranCancel);
     this.$refs.top.addEventListener("transitionend", this.tranEnd);
   },
@@ -75,8 +76,11 @@ export default {
       this.steptime = time;
       this.lyric = content;
       this.showtext = content[0]; //新歌重置
+      console.log(time);
     },
     showLyric(play) {
+      this.ischange = false; //点击播放暂停时代表歌曲未切换
+      this.pointmove = false; //点击播放时代表小圆点移动结束
       if (play) {
         //播放
         this.transname = "width"; //设置过渡属性
@@ -86,7 +90,7 @@ export default {
         return; //歌曲暂停后不应再执行后续逻辑
       }
       if (this.remaintime === -1) {
-        //代表未被暂停过，即第一直播放
+        //代表未被暂停过，即一直播放
         //每首歌第一句歌词不一定是0秒开始
         if (this.steptime[0] == 0) {
           this.width = "100%"; //完全显示歌词
@@ -98,27 +102,30 @@ export default {
           }, this.steptime[0]);
         }
       } else {
-        //此时 remaintime必定不为 -1,即暂停后重新播放了
+        //此时 remaintime不为 -1,即暂停后重新播放了
         this.width = "100%";
         this.transname = "width";
         this.ms = this.remaintime;
       }
     },
     tranCancel(e) {
-      /**
-       * bug
-       */
-      console.log("cancel");
-      //过渡暂停，即歌曲暂停处理函数
+      if (this.ischange || this.pointmove) {
+        /*切换歌曲后由于设置的过渡在 this.reset 中会触发 transitioncancel,应阻止
+         * 只应在同一首歌切换时才触发 transitincancel
+         */
+        this.pointmove = false;
+        return;
+      }
+      // console.log("%ccancel", "font-size:30px;color:#3498db");
+      //过渡取消，即歌曲暂停处理函数
       let altime = parseInt(e.elapsedTime * 1000); //获得已经过时间
       this.remaintime = this.ms - altime; //获得剩余时间
       let percent = (altime / this.ms).toPrecision(2); //获得比值
       this.width = percent.substring(2) + "%"; //定格上层歌词宽度
     },
     tranEnd() {
-      console.log("end");
       //过渡结束，即一句歌词显示完毕
-      if (this.index + 1 >= this.lyric.length) {
+      if (this.index + 1 > this.lyric.length) {
         //判断歌词是否结束
         if (this.timer) {
           clearTimeout(this.timer);
@@ -152,15 +159,48 @@ export default {
     },
     reset() {
       //重新初始化下一首歌的歌词
+      this.ischange = true; //歌曲id变化即切歌，把切歌标志设为 true
       this.showtext = this.lyric[0]; //显示第一句歌词
-      this.transname = "none";
-      this.width = "0";
+      this.transname = "none"; //过渡属性设为'none'会取消过渡
+      this.width = "0"; //改变过度属性的值也会取消过渡
+      this.ms = 0; //中途改变过渡时间设为0不会触发过渡取消
       this.index = 0;
-      // this.ms = 0;
       this.remaintime = -1;
       if (this.timer) {
         clearTimeout(this.timer);
       }
+    },
+    seek(time) {
+      this.pointmove = true;
+      const ct = parseInt(time * 1000); //毫秒转化
+      const i = this.binSearch(ct); //找到大于当前时间的第一个时间值
+      this.index = i - 1; //得到本句歌词开始时间
+      this.showtext = this.lyric[i - 1]; //显示
+      this.ms = this.steptime[i] - ct; //剩余时间
+      this.transname = "none"; //触发过渡取消吧，应阻止,不然会扰乱状态
+      const dura = this.steptime[i] - this.steptime[i - 1]; //获得歌词时间长度
+      const alt = ct - this.steptime[i - 1]; //获得已经过时间
+      const percent = (alt / dura).toPrecision(2); //获得比值
+      this.width = percent.substring(2) + "%"; //定格上层歌词宽度
+      this.timer = setTimeout(() => {
+        //重新开始过渡
+        this.width = "100%";
+        this.transname = "width";
+      }, 1);
+    },
+    binSearch(time) {
+      let lo = 0;
+      let hi = this.steptime.length - 1;
+      let mid;
+      while (lo <= hi) {
+        mid = (lo + hi) >> 1;
+        if (this.steptime[mid] <= time) {
+          lo = mid + 1;
+        } else {
+          hi = mid - 1;
+        }
+      }
+      return lo;
     },
   },
 };
@@ -169,9 +209,9 @@ export default {
 <style lang="scss" scoped>
 .lyrics {
   position: fixed;
-  top: 90px;
-  left: 200px;
-  // background-color: rgb(8, 8, 8);
+  top: 220px;
+  left: 20%;
+  visibility: hidden;
   p {
     font-size: 35px;
     font-weight: bold;
@@ -188,5 +228,8 @@ export default {
     white-space: nowrap;
     overflow: hidden;
   }
+}
+.lyrdis {
+  visibility: visible;
 }
 </style>
