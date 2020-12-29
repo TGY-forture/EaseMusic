@@ -67,7 +67,13 @@
       <i class="custom-icon custom-icon-laba"></i>
       <i class="custom-icon custom-icon-sub" @click="subVol"></i>
       <i class="custom-icon custom-icon-plus" @click="addVol"></i>
-      <span @click="lyricshow = !lyricshow">词</span>
+      <span
+        @click="lyricshow = !lyricshow"
+        :style="{ color: lyricshow ? 'rgb(206, 78, 78)' : 'black' }"
+        v-show="vipend == 0"
+      >
+        词
+      </span>
     </div>
     <i class="custom-icon custom-icon--back"></i>
     <Lyrics :show="lyricshow" :id="song.id" />
@@ -78,7 +84,7 @@
 import { getMp3Url } from "@/api/like/like.js";
 import { mapState, mapGetters, mapActions } from "vuex";
 import Lyrics from "@/components/util/lyrics";
-import Bus from "@/assets/bus.js";
+import Bus from "@/assets/js/bus.js";
 
 export default {
   name: "playcontrol",
@@ -100,6 +106,7 @@ export default {
       vipstart: 0,
       vipend: 0,
       lyricshow: false,
+      hasmove: false,
     };
   },
   computed: {
@@ -117,6 +124,8 @@ export default {
         if (res.url) {
           this.mp3url = res.url;
           if (res.start) {
+            this.vipstart = res.start;
+            this.vipend = res.end;
             this.starts = this.timeTrans(res.start, false);
             this.rawstart = this.starts;
             let r = ((res.start * 1000) / this.song.dt).toPrecision(2);
@@ -143,6 +152,12 @@ export default {
       this.$refs.music.currentTime = (this.song.dt / 1000) * rate; //设置时间
       this.past = e.offsetX; //更新已播放进度条长度
       this.sleft = e.offsetX - 4; //更新指示点位置
+      this.starts = this.timeTrans(this.$refs.music.currentTime, false);
+      Bus.$emit("seek", this.$refs.music.currentTime);
+      if (!this.play) {
+        this.play = true;
+        this.$refs.music.play();
+      }
     },
     playAndStop() {
       if (!this.play) {
@@ -159,15 +174,22 @@ export default {
       //鼠标按下事件
       this.play = false;
       this.addtran = false;
+      Bus.$emit("pauseOrPlay", this.play);
       this.$refs.music.pause(); //点击指示点时，应暂停音乐
       this.$refs.pro.addEventListener("mousemove", this.drag); //添加 mousemove事件
     },
     cancelMove(e) {
       //鼠标抬起事件
       this.play = true;
+      if (this.hasmove) {
+        Bus.$emit("seek", this.$refs.music.currentTime);
+      } else {
+        Bus.$emit("pauseOrPlay", this.play);
+      }
       this.$refs.music.play(); //继续播放
       e.stopPropagation(); //阻止冒泡
       this.$refs.pro.removeEventListener("mousemove", this.drag); //移除 mousemove事件
+      this.hasmove = false;
     },
     drag(e) {
       //鼠标点击指示点拖动事件
@@ -178,6 +200,7 @@ export default {
         this.past = e.offsetX; //
         this.sleft = e.offsetX - 4;
       }
+      this.hasmove = true;
     },
     async next(flag) {
       Bus.$emit("nextChange");
@@ -202,7 +225,11 @@ export default {
       }
       let res = await this.uniGetInfo(this.playlist[this.index]);
       if (!res.url) {
-        this.next();
+        if (flag) {
+          this.next(true);
+        } else {
+          this.next(false);
+        }
       }
     },
     addVol() {
@@ -298,12 +325,13 @@ export default {
 .playctrl {
   width: 100%;
   height: 70px;
-  background-color: rgb(136, 134, 134);
+  background-color: rgb(138, 132, 132);
   position: absolute;
   bottom: 0;
   display: flex;
   align-items: center;
   border-radius: 0 0 4px 4px;
+  z-index: 10;
   .basic-info {
     width: 170px;
     display: flex;
@@ -349,7 +377,6 @@ export default {
     align-items: center;
     justify-content: space-around;
     margin-left: 100px;
-    // background-color: rgb(77, 69, 69);
     position: relative;
     div:first-child {
       width: 200px;
@@ -400,7 +427,6 @@ export default {
       p {
         width: 50%;
         height: 100%;
-        // background-color: rgb(197, 191, 191);
         background-color: rgb(64, 70, 70);
         margin-bottom: 0;
         border-radius: 2px;
@@ -450,7 +476,7 @@ export default {
     span {
       cursor: pointer;
       &:hover {
-        color: rgb(206, 78, 78);
+        color: rgb(206, 78, 78) !important;
       }
     }
   }
