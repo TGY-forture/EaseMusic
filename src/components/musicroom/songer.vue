@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { getSongerList } from "@/api/songer.js";
+import { getSongerList } from "@/api/musicroom/songer.js";
 let lang = [
   { name: "全部", area: -1 },
   { name: "华语", area: 7 },

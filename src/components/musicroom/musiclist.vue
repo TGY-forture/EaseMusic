@@ -70,7 +70,7 @@ import {
   hotCategory,
   highQuality,
   playLists,
-} from "@/api/songlist.js";
+} from "@/api/musicroom/songlist.js";
 
 export default {
   name: "MusicList",

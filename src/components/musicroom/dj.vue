@@ -71,8 +71,8 @@
 <script>
 import PicList from "@/components/util/piclist";
 import Banner from "@/components/util/banner";
-import { djBanner, djCategories, payHighQual } from "@/api/dj.js";
-import { getReDj } from "@/api/recommand.js";
+import { djBanner, djCategories, payHighQual } from "@/api/musicroom/dj.js";
+import { getReDj } from "@/api/musicroom/recommand.js";
 export default {
   name: "Dj",
   components: {

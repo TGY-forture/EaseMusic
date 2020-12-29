@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { topList } from "@/api/toplist.js";
+import { topList } from "@/api/musicroom/toplist.js";
 export default {
   name: "TopList",
   data() {

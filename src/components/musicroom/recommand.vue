@@ -113,7 +113,7 @@ import {
   privateContent,
   getNewSongs,
   getReMv,
-} from "@/api/recommand.js";
+} from "@/api/musicroom/recommand.js";
 export default {
   name: "Recommand",
   components: {

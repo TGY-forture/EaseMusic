@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { getNewSong } from "@/api/latestsong.js";
+import { getNewSong } from "@/api/musicroom/latestsong.js";
 let label = [
   { name: "全部", type: 0 },
   { name: "华语", type: 7 },

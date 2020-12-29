@@ -1,11 +1,6 @@
 <template>
   <div class="user" ref="u">
-    <a-avatar
-      class="avatar"
-      src="https://p3.music.126.net/TmBm7D8UUx87qp2lnOJtLA==/109951165478043053.jpg"
-      icon="user"
-      @click="showModal"
-    />
+    <a-avatar class="avatar" :src="avatarUrl" icon="user" @click="showModal" />
     <a-dropdown
       placement="bottomCenter"
       :trigger="['click']"
@@ -21,21 +16,21 @@
       <div class="u-drop" slot="overlay">
         <div class="concern">
           <div>
-            <p>0</p>
+            <p>{{ eventcount }}</p>
             <p>动态</p>
           </div>
           <div>
-            <p>1</p>
+            <p>{{ follows }}</p>
             <p>关注</p>
           </div>
           <div>
-            <p>2</p>
+            <p>{{ followeds }}</p>
             <p>粉丝</p>
           </div>
         </div>
-        <a-button>签到</a-button>
+        <a-button @click="dailySign">签到</a-button>
         <ul class="citem">
-          <li>
+          <li @click="toLevel">
             <i class="custom-icon custom-icon-level"></i>
             <span>等级</span>
             <i class="uarrow custom-icon custom-icon-Right"></i>
@@ -52,9 +47,7 @@
         </ul>
       </div>
     </a-dropdown>
-    <i class="nav-ri custom-icon custom-icon-icon_skin"></i>
     <i class="nav-ri custom-icon custom-icon-Email"></i>
-    <i class="nav-ri custom-icon custom-icon-rescale"></i>
     <i class="nav-ri custom-icon custom-icon-sub"></i>
     <i class="nav-ri custom-icon custom-icon-error"></i>
     <a-modal
@@ -107,14 +100,12 @@
           <a-button htmlType="submit">登录</a-button>
         </a-form-model-item>
       </a-form-model>
-      <div style="text-align: center">
-        <a href="javascript:void 0;">注册</a>
-      </div>
     </a-modal>
   </div>
 </template>
 
 <script>
+import { log, dailySignin, getUserInfo } from "@/api/userinfo/userinfo.js";
 export default {
   name: "User",
   data() {
@@ -122,6 +113,11 @@ export default {
       visible: false,
       phone: "",
       pass: "",
+      src: "",
+      follows: 0,
+      followeds: 0,
+      eventcount: 0,
+      avatarUrl: "",
     };
   },
   methods: {
@@ -129,21 +125,34 @@ export default {
       this.visible = true;
     },
     handleSubmit(e) {
-      this.$axios
-        .get(
-          "http://localhost:3000/login/cellphone?phone=18361812729&password=xxxx"
-        )
+      log(this.phone, this.pass)
         .then((res) => {
-          if (res.data.code == 200) {
+          if (res.code === 200) {
+            this.phone = "";
+            this.pass = "";
             this.$message.success("登录成功");
+            return getUserInfo(res.userid);
+          } else {
+            this.$message.error("登录失败");
           }
+        })
+        .then((data) => {
+          ({
+            follows: this.follows,
+            followeds: this.follweds,
+            eventcount: this.eventcount,
+            avatarUrl: this.avatarUrl,
+          } = data);
         });
+    },
+    toLevel() {
+      window.open("https://music.163.com/#/user/level", "blank");
     },
     pressEnter() {
       console.log(1);
     },
-    onChange(e) {
-      // console.log(`checked = ${e.target.checked}`);
+    dailySign() {
+      dailySignin();
     },
     logOut() {
       this.$axios.get("http://localhost:3000/logout").then((res) => {
@@ -152,6 +161,9 @@ export default {
           this.$message.success("已下线");
         }
       });
+    },
+    onChange(e) {
+      // console.log(`checked = ${e.target.checked}`);
     },
   },
 };

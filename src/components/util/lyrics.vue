@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import Bus from "@/assets/bus.js";
+import Bus from "@/assets/js/bus.js";
 export default {
   name: "lyrics",
   props: {
@@ -76,7 +76,6 @@ export default {
       this.steptime = time;
       this.lyric = content;
       this.showtext = content[0]; //新歌重置
-      console.log(time);
     },
     showLyric(play) {
       this.ischange = false; //点击播放暂停时代表歌曲未切换
