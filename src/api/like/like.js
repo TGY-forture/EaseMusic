@@ -1,12 +1,12 @@
 import axios from 'axios'
 
-async function getLikes(uid = 568642919) {
-  const { data: { ids } } = await axios.get(`http://localhost:3000/likelist?uid=${uid}`)
+async function getLikes(uid) {
+  const { data: { ids } } = await axios.get(`/likelist?uid=${uid}`)
   return ids
 }
-
-async function getLists(uid = 568642919) {
-  const { data: { playlist } } = await axios.get(`http://localhost:3000/user/playlist?uid=${uid}`)
+//568642919
+async function getLists(uid) {
+  const { data: { playlist } } = await axios.get(`/user/playlist?uid=${uid}`)
   return playlist.map(item => {
     return {
       playCount: item.playCount,
@@ -20,7 +20,7 @@ async function getLists(uid = 568642919) {
 }
 
 async function getSongDetail(sid) {
-  const { data: { songs } } = await axios.get(`http://localhost:3000/song/detail?ids=${sid}`)
+  const { data: { songs } } = await axios.get(`/song/detail?ids=${sid}`)
   return songs.map(item => {
     return {
       name: item.name,
@@ -36,7 +36,7 @@ async function getSongDetail(sid) {
 }
 
 async function getMp3Url(id) {
-  const { data: { data } } = await axios.get(`http://localhost:3000/song/url?id=${id}`)
+  const { data: { data } } = await axios.get(`/song/url?id=${id}`)
   return {
     url: data[0].url,
     start: data[0].freeTrialInfo ? data[0].freeTrialInfo.start : undefined,

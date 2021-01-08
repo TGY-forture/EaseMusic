@@ -3,7 +3,7 @@ import axios from "axios";
 async function getAlbum() {
   const {
     data: { data, count },
-  } = await axios.get("http://localhost:3000/album/sublist");
+  } = await axios.get("/album/sublist");
   const info = data.map((item) => {
     return {
       picUrl: item.picUrl,
@@ -21,7 +21,7 @@ async function getAlbum() {
 async function getSonger() {
   const {
     data: { data, count },
-  } = await axios.get("http://localhost:3000/artist/sublist");
+  } = await axios.get("/artist/sublist");
   const info = data.map((item) => {
     return {
       picUrl: item.picUrl,
@@ -39,7 +39,7 @@ async function getSonger() {
 async function getMv() {
   const {
     data: { data, count },
-  } = await axios.get("http://localhost:3000/mv/sublist");
+  } = await axios.get("/mv/sublist");
   const info = data.map((item) => {
     return {
       title: item.title,

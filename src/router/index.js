@@ -1,7 +1,7 @@
 /*
  * @Date: 2020-11-18 10:06:52
  * @LastEditors: tgy
- * @LastEditTime: 2020-12-04 20:08:02
+ * @LastEditTime: 2020-12-30 22:39:21
  * @Author: tgy
  */
 import Vue from 'vue'
@@ -17,7 +17,6 @@ VueRouter.prototype.push = function push(location) {
 let musicroom = () => import('@/components/musicroom/musicroom')
 let films = () => import('@/components/video/video')
 let cloudpan = () => import('@/components/cloudpan/cloudpan')
-let history = () => import('@/components/history/history')
 let collection = () => import('@/components/collection/collection')
 let like = () => import('@/components/like/like')
 let musiclist = () => import('@/components/musicroom/musiclist')
@@ -30,7 +29,7 @@ let recommand = () => import('@/components/musicroom/recommand')
 const routes = [
   {
     path: '/',
-    redirect: '/films',
+    redirect: '/musicroom',
   },
   {
     path: '/musicroom',
@@ -73,11 +72,6 @@ const routes = [
     path: '/films',
     name: 'films',
     component: films
-  },
-  {
-    path: "/history",
-    name: 'history',
-    component: history
   },
   {
     path: "/cloudpan",

@@ -1,34 +1,49 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
+import Vue from "vue";
+import App from "./App.vue";
+import router from "./router";
+import store from "./store";
 
-import { message, Avatar, Button, Dropdown, Menu, Icon, Modal, FormModel, Input, Checkbox, Popover } from 'ant-design-vue';
-import 'ant-design-vue/dist/antd.css';
+import {
+  message,
+  Avatar,
+  Button,
+  Dropdown,
+  Menu,
+  Icon,
+  Modal,
+  FormModel,
+  Input,
+  Checkbox,
+  Popover,
+  Progress
+} from "ant-design-vue";
 
-import axios from 'axios'
+import "ant-design-vue/dist/antd.css";
 
-// axios.defaults.baseURL = 'http://localhost:3000/'
+import axios from "axios";
+
+axios.defaults.baseURL = 'http://tserch.xyz:4000/'
 axios.defaults.withCredentials = true;
 
 Vue.use(FormModel);
-Vue.use(Avatar)
-Vue.use(Button)
-Vue.use(Dropdown)
-Vue.use(Menu)
-Vue.use(Icon)
-Vue.use(Modal)
-Vue.use(Input)
-Vue.use(Checkbox)
-Vue.use(Popover)
+Vue.use(Avatar);
+Vue.use(Button);
+Vue.use(Dropdown);
+Vue.use(Menu);
+Vue.use(Icon);
+Vue.use(Modal);
+Vue.use(Input);
+Vue.use(Checkbox);
+Vue.use(Popover);
+Vue.use(Progress)
 
 Vue.prototype.$message = message;
-Vue.prototype.$axios = axios
+Vue.prototype.$axios = axios;
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 new Vue({
   router,
   store,
-  render: h => h(App)
-}).$mount('#app')
+  render: (h) => h(App),
+}).$mount("#app");

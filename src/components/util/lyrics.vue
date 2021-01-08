@@ -44,7 +44,7 @@ export default {
         data: {
           lrc: { lyric },
         },
-      } = await this.$axios.get(`http://localhost:3000/lyric?id=${this.id}`);
+      } = await this.$axios.get(`/lyric?id=${this.id}`);
       this.lyricParse(lyric);
       this.reset();
     },

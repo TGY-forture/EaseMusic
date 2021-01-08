@@ -6,7 +6,7 @@ import axios from "axios";
 async function getReBanner() {
   const {
     data: { banners },
-  } = await axios.get("http://localhost:3000/banner");
+  } = await axios.get("/banner");
   return banners.map((item) => {
     return {
       imageUrl: item.imageUrl,
@@ -23,7 +23,7 @@ async function getReBanner() {
 async function getDailyReList() {
   const {
     data: { result },
-  } = await axios.get("http://localhost:3000/personalized?limit=9");
+  } = await axios.get("/personalized?limit=9");
   return result.map((item) => {
     return {
       id: item.id,
@@ -40,7 +40,7 @@ async function getDailyReList() {
 async function privateContent() {
   const {
     data: { result },
-  } = await axios.get("http://localhost:3000/personalized/privatecontent");
+  } = await axios.get("/personalized/privatecontent");
   return result.map((item) => {
     return {
       id: item.id,
@@ -57,7 +57,7 @@ async function privateContent() {
 async function getNewSongs() {
   const {
     data: { data },
-  } = await axios.get("http://localhost:3000/top/song?type=0");
+  } = await axios.get("/top/song?type=0");
   return data.map((item) => {
     return {
       picUrl: item.album.picUrl,
@@ -78,7 +78,7 @@ async function getNewSongs() {
  * @description: 推荐mv
  */
 async function getReMv() {
-  const { data: { result } } = await axios.get('http://localhost:3000/personalized/mv')
+  const { data: { result } } = await axios.get('/personalized/mv')
   return result.map((item) => {
     return {
       id: item.id,
@@ -96,7 +96,7 @@ async function getReMv() {
  * @description: 主播电台
  */
 async function getReDj() {
-  const { data: { data } } = await axios.get('http://localhost:3000/dj/personalize/recommend')
+  const { data: { data } } = await axios.get('/dj/personalize/recommend')
   return data.map((item) => {
     return {
       id: item.id,

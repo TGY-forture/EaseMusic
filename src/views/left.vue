@@ -73,11 +73,11 @@ let onlinelist = [
   },
 ];
 let mymusic = [
-  {
-    text: "播放历史",
-    classname: "custom-icon-history",
-    path: "/history",
-  },
+  // {
+  //   text: "播放历史",
+  //   classname: "custom-icon-history",
+  //   path: "/history",
+  // },
   {
     text: "音乐云盘",
     classname: "custom-icon-Ioniconsmdcloudoutline",

@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 async function getVideoLabel() {
-  const { data: { data } } = await axios.get('http://localhost:3000/video/group/list')
+  const { data: { data } } = await axios.get('/video/group/list')
   return data.map(item => {
     return {
       name: item.name,
@@ -11,7 +11,7 @@ async function getVideoLabel() {
 }
 
 async function getVideoKind() {
-  const { data: { data } } = await axios.get('http://localhost:3000/video/category/list')
+  const { data: { data } } = await axios.get('/video/category/list')
   return data.map(item => {
     return {
       name: item.name,
@@ -21,7 +21,7 @@ async function getVideoKind() {
 }
 
 async function getVideoLists(id, offset = 0) {
-  const { data: { datas } } = await axios.get(`http://localhost:3000/video/group?id=${id}&offset=${offset}`)
+  const { data: { datas } } = await axios.get(`/video/group?id=${id}&offset=${offset}`)
   return datas.map(({ data }) => {
     return {
       coverUrl: data.coverUrl,

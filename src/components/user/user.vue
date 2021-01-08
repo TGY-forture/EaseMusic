@@ -11,7 +11,7 @@
       "
     >
       <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-        流金岁月<i class="custom-icon custom-icon-arrow-down"></i>
+        {{ nickname }}<i class="custom-icon custom-icon-arrow-down"></i>
       </a>
       <div class="u-drop" slot="overlay">
         <div class="concern">
@@ -47,7 +47,18 @@
         </ul>
       </div>
     </a-dropdown>
-    <i class="nav-ri custom-icon custom-icon-Email"></i>
+    <a-dropdown
+      placement="bottomCenter"
+      :trigger="['click']"
+      :getPopupContainer="
+        () => {
+          return $refs.u;
+        }
+      "
+    >
+      <i class="nav-ri custom-icon custom-icon-Email"></i>
+      <Message slot="overlay" />
+    </a-dropdown>
     <i class="nav-ri custom-icon custom-icon-sub"></i>
     <i class="nav-ri custom-icon custom-icon-error"></i>
     <a-modal
@@ -85,7 +96,6 @@
             type="password"
             autocomplete
             v-model="pass"
-            @pressEnter="pressEnter"
           >
             <i
               slot="prefix"
@@ -106,59 +116,81 @@
 
 <script>
 import { log, dailySignin, getUserInfo } from "@/api/userinfo/userinfo.js";
+import Message from "./message";
+import { mapMutations, mapGetters } from "vuex";
+import Bus from "@/assets/js/bus.js";
 export default {
   name: "User",
+  components: {
+    Message,
+  },
   data() {
     return {
       visible: false,
       phone: "",
       pass: "",
-      src: "",
-      follows: 0,
-      followeds: 0,
-      eventcount: 0,
-      avatarUrl: "",
     };
   },
+  computed: {
+    ...mapGetters([
+      "follows",
+      "followeds",
+      "eventcount",
+      "avatarUrl",
+      "nickname",
+    ]),
+  },
+  mounted() {
+    const cookies = document.cookie;
+    if (cookies.includes("__remember_me")) {
+      return;
+    } else {
+      log("18361812729", "tgy12345")
+        .then((res) => {
+          this.updateUid(res.userid);
+          return getUserInfo(res.userid);
+        })
+        .then((data) => {
+          this.updateUser(data);
+          Bus.$emit("log");
+        });
+    }
+  },
   methods: {
+    ...mapMutations(["updateUser", "updateUid", "removeUser"]),
     showModal() {
       this.visible = true;
     },
-    handleSubmit(e) {
+    handleSubmit() {
       log(this.phone, this.pass)
         .then((res) => {
           if (res.code === 200) {
             this.phone = "";
             this.pass = "";
             this.$message.success("登录成功");
+            this.visible = false;
+            this.updateUid(res.userid);
             return getUserInfo(res.userid);
           } else {
             this.$message.error("登录失败");
           }
         })
         .then((data) => {
-          ({
-            follows: this.follows,
-            followeds: this.follweds,
-            eventcount: this.eventcount,
-            avatarUrl: this.avatarUrl,
-          } = data);
+          this.updateUser(data);
+          Bus.$emit("log");
         });
     },
     toLevel() {
       window.open("https://music.163.com/#/user/level", "blank");
     },
-    pressEnter() {
-      console.log(1);
-    },
     dailySign() {
       dailySignin();
     },
     logOut() {
-      this.$axios.get("http://localhost:3000/logout").then((res) => {
-        console.log(res);
+      this.$axios.get("/logout").then((res) => {
         if (res.data.code == 200) {
           this.$message.success("已下线");
+          this.removeUser();
         }
       });
     },

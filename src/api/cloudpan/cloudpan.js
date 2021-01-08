@@ -30,7 +30,7 @@ function timeTran(ms) {
 async function getCloudInfo() {
   const {
     data: { data, count, size, maxSize },
-  } = await axios.get("http://localhost:3000/user/cloud");
+  } = await axios.get("/user/cloud");
   const info = data.map((item) => {
     return {
       fileSize: process(item.fileSize),

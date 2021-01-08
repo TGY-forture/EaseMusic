@@ -6,7 +6,7 @@ import axios from "axios";
 async function songCategory() {
   const {
     data: { sub, categories },
-  } = await axios.get("http://localhost:3000/playlist/catlist");
+  } = await axios.get("/playlist/catlist");
   const subcat = sub.map((item) => {
     return {
       name: item.name,
@@ -25,7 +25,7 @@ async function songCategory() {
 async function hotCategory() {
   const {
     data: { tags },
-  } = await axios.get("http://localhost:3000/playlist/hot");
+  } = await axios.get("/playlist/hot");
   return tags.map((item) => {
     return {
       name: item.name,
@@ -44,7 +44,7 @@ async function highQuality(category, limit = 1, uptime) {
   const {
     data: { playlists },
   } = await axios.get(
-    `http://localhost:3000/top/playlist/highquality?cat=${category}&limit=${limit}` + (uptime ? `&before=${uptime}` : "")
+    `/top/playlist/highquality?cat=${category}&limit=${limit}` + (uptime ? `&before=${uptime}` : "")
   );
   return playlists.map(item => {
     return {
@@ -67,7 +67,7 @@ async function highQuality(category, limit = 1, uptime) {
  * @param {*} offset
  */
 async function playLists(cat, limit = 52, offset = 1) {
-  const { data: { playlists } } = await axios.get(`http://localhost:3000/top/playlist?cat=${cat}&limit=${limit}&offset=${offset}`)
+  const { data: { playlists } } = await axios.get(`/top/playlist?cat=${cat}&limit=${limit}&offset=${offset}`)
   return playlists.map(item => {
     return {
       name: item.name,

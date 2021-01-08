@@ -8,7 +8,7 @@ function parseNum(num) {
 }
 
 async function getNewSong(type = 0) {
-  const { data: { data } } = await axios.get(`http://localhost:3000/top/song?type=${type}`)
+  const { data: { data } } = await axios.get(`/top/song?type=${type}`)
   return data.map(item => {
     return {
       picUrl: item.album.picUrl,

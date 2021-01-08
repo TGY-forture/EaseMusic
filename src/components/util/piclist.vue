@@ -156,7 +156,6 @@ export default {
   .rd-icon {
     position: absolute;
     font-size: 30px;
-    // top: 100px;
     right: 10px;
     transition: opacity 0.5s;
     z-index: 7;

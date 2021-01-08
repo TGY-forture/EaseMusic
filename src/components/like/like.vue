@@ -93,12 +93,12 @@ export default {
     },
   },
   created() {
-    getLists().then((res) => {
+    getLists(this.$store.state.uid).then((res) => {
       this.songinfo = res[0];
     });
   },
   beforeMount() {
-    getLikes()
+    getLikes(this.$store.state.uid)
       .then((ids) => {
         return getSongDetail(ids.slice(0, 50).join(","));
       })

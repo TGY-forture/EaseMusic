@@ -1,5 +1,5 @@
 <template>
-  <div class="playctrl">
+  <div class="playctrl" v-if="!small">
     <div class="basic-info">
       <img :src="song.picUrl" alt="logo" />
       <div class="b-ri">
@@ -75,8 +75,11 @@
         词
       </span>
     </div>
-    <i class="custom-icon custom-icon--back"></i>
+    <i class="custom-icon custom-icon--back" @click="beSmall"></i>
     <Lyrics :show="lyricshow" :id="song.id" />
+  </div>
+  <div v-else class="hide-platctrl">
+    <i class="custom-icon custom-icon-go1" @click="beBig"></i>
   </div>
 </template>
 
@@ -107,45 +110,58 @@ export default {
       vipend: 0,
       lyricshow: false,
       hasmove: false,
+      small: true,
     };
   },
   computed: {
     ...mapState(["playlist"]),
     ...mapGetters(["len"]),
   },
-  mounted() {
-    this.getLoveMusic()
-      .then(() => {
-        this.index = this.randomIndex();
-        this.song = this.playlist[this.index];
-        return getMp3Url(this.song.id);
-      })
-      .then((res) => {
-        if (res.url) {
-          this.mp3url = res.url;
-          if (res.start) {
-            this.vipstart = res.start;
-            this.vipend = res.end;
-            this.starts = this.timeTrans(res.start, false);
-            this.rawstart = this.starts;
-            let r = ((res.start * 1000) / this.song.dt).toPrecision(2);
-            this.past = Number(r) * 400;
-            this.sleft = this.past - 4;
-          } else {
-            this.starts = "00:00";
-            this.past = 0;
-            this.sleft = -4;
-          }
-        } else {
-          this.next(false);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  created() {
+    Bus.$on("log", this.init);
   },
   methods: {
     ...mapActions(["getLoveMusic"]),
+    init() {
+      this.small = false;
+      this.getLoveMusic()
+        .then(() => {
+          this.index = this.randomIndex();
+          this.song = this.playlist[this.index];
+          return getMp3Url(this.song.id);
+        })
+        .then((res) => {
+          if (res.url) {
+            this.mp3url = res.url;
+            if (res.start) {
+              this.vipstart = res.start;
+              this.vipend = res.end;
+              this.starts = this.timeTrans(res.start, false);
+              this.rawstart = this.starts;
+              let r = ((res.start * 1000) / this.song.dt).toPrecision(2);
+              this.past = Number(r) * 400;
+              this.sleft = this.past - 4;
+            } else {
+              this.starts = "00:00";
+              this.past = 0;
+              this.sleft = -4;
+            }
+          } else {
+            this.next(false);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    },
+    beBig() {
+      if (this.$store.uid == 0) {
+        this.$message.warn("请登录");
+        return;
+      } else {
+        this.small = false;
+      }
+    },
     restPlay(e) {
       this.addtran = true; //改变播放按钮样式
       const rate = (e.offsetX / 400).toPrecision(2); //获取点击处偏移与进度条总长比值
@@ -317,6 +333,9 @@ export default {
       }
       return res;
     },
+    beSmall() {
+      this.small = true;
+    },
   },
 };
 </script>
@@ -486,5 +505,15 @@ export default {
     margin-right: 10px;
     font-size: 26px;
   }
+}
+.hide-platctrl {
+  position: absolute;
+  bottom: 0;
+  z-index: 10;
+  left: 74px;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 50%;
+  background-color: rgb(204, 199, 199);
 }
 </style>

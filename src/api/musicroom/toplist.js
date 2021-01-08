@@ -4,7 +4,7 @@ import axios from 'axios'
  * @description: 获取所有榜单
  */
 async function topList() {
-  const { data: { list, artistToplist } } = await axios.get('http://localhost:3000/toplist')
+  const { data: { list, artistToplist } } = await axios.get('/toplist')
   const tranlist = list.map(item => {
     return {
       id: item.id,
@@ -34,7 +34,7 @@ async function topList() {
  * @param {*} id
  */
 async function getSingleTop(id) {
-  const { data: { playlist: { tracks } } } = await axios.get(`http://localhost:3000/playlist/detail?id=${id}`)
+  const { data: { playlist: { tracks } } } = await axios.get(`/playlist/detail?id=${id}`)
   return tracks.map(item => {
     return {
       name: item.name,
@@ -51,7 +51,7 @@ async function getSingleTop(id) {
  * @param {*} type
  */
 async function getSongerList(type = 1) {
-  const { data: { list: { artists } } } = await axios.get(`http://localhost:3000/toplist/artist?type=${type}`)
+  const { data: { list: { artists } } } = await axios.get(`/toplist/artist?type=${type}`)
   return artists.map(item => {
     return {
       name: item.name, id: item.id, picUrl: item.picUrl

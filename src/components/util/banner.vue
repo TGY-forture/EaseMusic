@@ -82,7 +82,7 @@ export default {
     },
   },
   mounted() {
-    // this.timer = setInterval(this.change, 5000);
+    this.timer = setInterval(this.change, 5000);
   },
   destroyed() {
     clearInterval(this.timer);

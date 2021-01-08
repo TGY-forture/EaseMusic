@@ -1,12 +1,18 @@
 <template>
   <div class="right-view">
     <nav class="nav">
-      <i class="u-arrow custom-icon custom-icon-Larrow"></i>
-      <i class="u-arrow custom-icon custom-icon-Right"></i>
-      <div class="search">
-        <input type="text" class="inp" placeholder="搜索音乐" />
+      <i
+        class="u-arrow custom-icon custom-icon-Larrow"
+        @click="$router.go(-1)"
+      ></i>
+      <i
+        class="u-arrow custom-icon custom-icon-Right"
+        @click="$router.go(1)"
+      ></i>
+      <!-- <div class="search">
+        <input type="text" class="inp" disabled placeholder="搜索音乐" />
         <i class="custom-icon custom-icon-search1"></i>
-      </div>
+      </div> -->
       <User />
     </nav>
     <router-view></router-view>
@@ -15,17 +21,10 @@
 
 <script>
 import User from "@/components/user/user";
-import MusicRoom from "@/components/musicroom/musicroom";
 export default {
   name: "Right",
   components: {
-    MusicRoom,
     User,
-  },
-  methods: {
-    dd() {
-      console.log(1);
-    },
   },
 };
 </script>

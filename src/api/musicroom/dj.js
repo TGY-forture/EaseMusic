@@ -4,7 +4,7 @@ import axios from 'axios'
  * @description: 电台轮播图
  */
 async function djBanner() {
-  const { data: { data } } = await axios.get('http://localhost:3000/dj/banner')
+  const { data: { data } } = await axios.get('/dj/banner')
   return data.map(item => {
     return {
       targetid: item.targetId,
@@ -17,7 +17,7 @@ async function djBanner() {
  * @description: 电台种类
  */
 async function djCategories() {
-  const { data: { categories } } = await axios.get('http://localhost:3000/dj/catelist')
+  const { data: { categories } } = await axios.get('/dj/catelist')
   return categories.map(item => {
     return {
       name: item.name,
@@ -30,7 +30,7 @@ async function djCategories() {
  * @description: 付费精选
  */
 async function payHighQual() {
-  const { data: { data: { list } } } = await axios.get('http://localhost:3000/dj/paygift?limit=4')
+  const { data: { data: { list } } } = await axios.get('/dj/paygift?limit=4')
   return list.map(item => {
     return {
       id: item.id,
